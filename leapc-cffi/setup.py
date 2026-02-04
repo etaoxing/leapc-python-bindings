@@ -55,6 +55,7 @@ def setup_symlink(file_path, destination_path):
             else:
                 # Just copy it for windows, so we don't need administrator privileges
                 shutil.copy(file_path, destination_path)
+            return True
         except OSError as error:
             print(error)
             error_msg = (
@@ -66,11 +67,13 @@ def setup_symlink(file_path, destination_path):
             raise Exception(error_msg)
     else:
         print("Looking for LeapC library at: " + file_path)
-        raise Exception(
+        print(
+            "Warning: "
             "No " + str(_OS_SHARED_OBJECT[get_system()]) + " found, please ensure you "
             "have Ultraleap Gemini Hand Tracking installed, or define LEAPSDK_INSTALL_LOCATION environment "
             "variable to point to a LeapSDK directory."
         )
+        return False
 
 
 def gather_leap_sdk():
@@ -128,14 +131,17 @@ def gather_leap_sdk():
     if os.path.exists(leapc_header_path):
         shutil.copy(leapc_header_path, os.path.join(_RESOURCE_DIRECTORY, "LeapC.h"))
     else:
-        raise Exception(
+        print(
+            "Warning: "
             "No LeapC.h found, please ensure you have Ultraleap Gemini Hand Tracking installed, or define "
             "LEAPSDK_INSTALL_LOCATION environment variable to point to a LeapSDK directory."
         )
+        return False
 
     # Create a symlink for the shared object
     symlink_path = os.path.join(_RESOURCE_DIRECTORY, _OS_SHARED_OBJECT[get_system()])
-    setup_symlink(libleapc_path, symlink_path)
+    if not setup_symlink(libleapc_path, symlink_path):
+        return False
 
     # On windows we also need to manage the LeapC.lib file
     if get_system() == "Windows":
@@ -148,11 +154,17 @@ def gather_leap_sdk():
                 _OS_DEFAULT_LIB_INSTALL_LOCATION[get_system()], "lib", "x64", "LeapC.lib"
             )
         symlink_lib_path = os.path.join(_RESOURCE_DIRECTORY, "LeapC.lib")
-        setup_symlink(windows_lib_path, symlink_lib_path)
+        if not setup_symlink(windows_lib_path, symlink_lib_path):
+            return False
+    return True
 
 
-gather_leap_sdk()
+_sdk_available = gather_leap_sdk()
 
-setuptools.setup(
-    cffi_modules=["src/scripts/cffi_build.py:ffibuilder"],
-)
+if _sdk_available:
+    setuptools.setup(
+        cffi_modules=["src/scripts/cffi_build.py:ffibuilder"],
+    )
+else:
+    print("Installing leapc-cffi without compiled CFFI bindings (SDK not found).")
+    setuptools.setup()
