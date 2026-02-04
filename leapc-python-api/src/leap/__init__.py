@@ -82,7 +82,7 @@ if os.path.isdir(cffi_path):
         )
 else:
     error_msg = f"Error: Unable to find leapc_cffi dir within directory {cffi_location}"
-    raise Exception(error_msg)
+    raise ImportError(error_msg)
 
 from .functions import (
     get_now,
