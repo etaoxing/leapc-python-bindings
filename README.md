@@ -14,7 +14,7 @@
 [![discord](https://img.shields.io/badge/Discord-Server-blueviolet)][discord]
 ![GitHub](https://img.shields.io/github/license/ultraleap/leapc-python-bindings)
 
-Open-source Python bindings for the Gemini LeapC API. Allowing developers to use Ultraleaps Hand Tracking technology
+Open-source Python bindings for the Gemini LeapC API (Gemini v5.17.x for Linux, Hyperion v6.2.0 for MacOS). Allowing developers to use Ultraleaps Hand Tracking technology
 with Python. Including build instructions and some simple examples to get started with. 
 
 ## Getting Started:
