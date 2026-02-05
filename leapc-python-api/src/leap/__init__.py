@@ -78,7 +78,9 @@ if os.path.isdir(cffi_path):
         else:
             error_msg = f"Unknown error, please consult readme for help. Attempting to find leapc_cffi within {cffi_location}"
         raise ImportError(
-            f"Cannot import leapc_cffi: {error_msg}. Caught ImportError: {import_error}"
+            f"Cannot import leapc_cffi: {error_msg}."
+            "Caught ImportError: {import_error}."
+            "Try re-installing leapc-cffi to build the package again."
         )
 else:
     error_msg = f"Error: Unable to find leapc_cffi dir within directory {cffi_location}"
