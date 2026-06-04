@@ -6,6 +6,7 @@ setup.py
 
 import os
 import platform
+import re
 
 from cffi import FFI
 
@@ -78,6 +79,31 @@ with open(leapc_header_fpath) as fp:
     leapc_header = fp.read()
 
 cffi_cdef = sanitise_leapc_header(leapc_header)
+
+
+def get_leapc_major_version():
+    for f in os.listdir(_RESOURCE_DIRECTORY):
+        m = re.match(r"libLeapC\.(\d+)\.dylib", f)
+        if m:
+            return int(m.group(1))
+        m = re.match(r"libLeapC\.so\.(\d+)", f)
+        if m:
+            return int(m.group(1))
+    return None
+
+
+leapc_version = get_leapc_major_version()
+
+if leapc_version is not None and leapc_version < 6:
+    # LEAP_HAND.flags (uint32_t, @since 6.2.0) is absent in v5.
+    # If present in the cdef, it shifts every field after `id` by 4 bytes.
+    cffi_cdef = re.sub(
+        r"(uint32_t id;\s*)/\*\*.*?@since 6\.2\.0\s*\*/\s*uint32_t flags;\s*",
+        r"\1",
+        cffi_cdef,
+        flags=re.DOTALL,
+    )
+    print(f"leapc-cffi: Detected LeapC v{leapc_version}, removed v6-only 'flags' field from LEAP_HAND")
 
 ffibuilder = FFI()
 ffibuilder.cdef(cffi_cdef, packed=True)

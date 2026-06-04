@@ -172,7 +172,10 @@ class Hand(LeapCStruct):
 
     @property
     def flags(self):
-        return self._data.flags
+        try:
+            return self._data.flags
+        except AttributeError:
+            return 0
 
     @property
     def type(self):
