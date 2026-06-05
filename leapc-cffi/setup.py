@@ -143,6 +143,16 @@ def gather_leap_sdk():
     if not setup_symlink(libleapc_path, symlink_path):
         return False
 
+    # Also symlink the versioned soname (e.g. libLeapC.so.5, libLeapC.so.6)
+    # so the runtime linker can resolve the soname embedded in the library.
+    if get_system() in ("Linux", "Linux-ARM"):
+        lib_dir = os.path.dirname(libleapc_path)
+        import glob
+        for versioned in glob.glob(os.path.join(lib_dir, "libLeapC.so.*")):
+            versioned_name = os.path.basename(versioned)
+            versioned_dest = os.path.join(_RESOURCE_DIRECTORY, versioned_name)
+            setup_symlink(versioned, versioned_dest)
+
     # On windows we also need to manage the LeapC.lib file
     if get_system() == "Windows":
         if _USER_DEFINED_INSTALL_LOCATION is not None:

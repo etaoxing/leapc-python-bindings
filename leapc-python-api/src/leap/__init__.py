@@ -16,8 +16,8 @@ _OS_DEFAULT_CFFI_INSTALL_LOCATION = {
 
 _OS_REQUIRED_CFFI_FILES = {
     "Windows": ["__init__.py", "LeapC.lib", "LeapC.dll"],
-    "Linux": ["__init__.py", "libLeapC.so", "libLeapC.so.5"],
-    "Linux-ARM": ["__init__.py", "libLeapC.so", "libLeapC.so.5"],
+    "Linux": ["__init__.py", "libLeapC.so"],
+    "Linux-ARM": ["__init__.py", "libLeapC.so"],
     "Darwin": ["__init__.py", "libLeapC.6.dylib", "libLeapC.dylib"],
 }
 
