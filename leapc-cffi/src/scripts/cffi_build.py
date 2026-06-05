@@ -93,20 +93,24 @@ def get_leapc_major_version():
 
 
 leapc_version = get_leapc_major_version()
+use_packed = True
 
 if leapc_version is not None and leapc_version < 6:
     # LEAP_HAND.flags (uint32_t, @since 6.2.0) is absent in v5.
-    # If present in the cdef, it shifts every field after `id` by 4 bytes.
+    # The v5 library was compiled without #pragma pack(1), so use unpacked layout.
+    # With packed=True the uint64_t visible_time field lands at offset 12 (not 8-aligned),
+    # but the actual library places it at 16, shifting every subsequent field by 4 bytes.
     cffi_cdef = re.sub(
         r"(uint32_t id;\s*)/\*\*.*?@since 6\.2\.0\s*\*/\s*uint32_t flags;\s*",
         r"\1",
         cffi_cdef,
         flags=re.DOTALL,
     )
-    print(f"leapc-cffi: Detected LeapC v{leapc_version}, removed v6-only 'flags' field from LEAP_HAND")
+    use_packed = False
+    print(f"leapc-cffi: Detected LeapC v{leapc_version}, using unpacked v5-compatible layout")
 
 ffibuilder = FFI()
-ffibuilder.cdef(cffi_cdef, packed=True)
+ffibuilder.cdef(cffi_cdef, packed=use_packed)
 
 cffi_src_fpath = os.path.join(os.path.dirname(__file__), "cffi_src.h")
 with open(cffi_src_fpath) as fp:
